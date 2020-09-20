@@ -20,7 +20,7 @@ def login():
                 "password": PASSWORD,
                 "loginreturnurl":'http://127.0.0.1:5000/',
                 "logintoken": LOGIN_TOKEN,
-                "format": "json"}        
+                "format": "json"}
 
     R = S.post(api_url, data=PARAMS_1)
     DATA = R.json()
@@ -84,17 +84,23 @@ def get_wikitext(title):
 
 if __name__ == '__main__':
     api_url = 'https://{}.{}.org/w/api.php'.format(LANGUAGE,PROJECT)
-    logins = login()
-    S = logins[0]
-    if logins[1] == 'PASS': #成功登入則執行
-        categories = get_pages_in_category()
-        print('目標分類「',LANGUAGE,':',CATEGORY_NAME,'」計',str(len(categories)),'個頁面',sep='',end=' ')
-        print('正在執行零編輯...')
-        status=[]
-        for cat in range(len(categories)):
-            wikitext = get_wikitext(title=categories[cat])+'{{subst:void}}'
-            status.append(editor(title=categories[cat],text=wikitext))
-            print('\r','已完成{}/{} ({:.2%})'.format(cat+1,len(categories),((cat+1)/len(categories))),end='', flush=True)
-        print('\n執行完成。')
-    else:
-        print('登入失敗！請檢查您的帳號或密碼是否輸入正確。')
+    try:
+        logins = login()
+        S = logins[0]
+        if logins[1] == 'PASS': #成功登入則執行
+            categories = get_pages_in_category()
+            print('目標分類「',LANGUAGE,':',CATEGORY_NAME,'」計',str(len(categories)),'個頁面',sep='',end=' ')
+            print('正在執行零編輯...')
+            try:
+                status=[]
+                for cat in range(len(categories)):
+                    wikitext = get_wikitext(title=categories[cat])+'{{subst:void}}'
+                    status.append(editor(title=categories[cat],text=wikitext))
+                    print('\r','已完成{}/{} ({:.2%})'.format(cat+1,len(categories),((cat+1)/len(categories))),end='', flush=True)
+                print('\n執行完成。')
+            except:
+                print('Error: 程序執行失敗！請檢查您所輸入之設定值是否有誤。') 
+        else:
+            print('Error: 登入失敗！請稍後再登入。')
+    except:
+        print('Error: 登入失敗！請檢查您的帳號或密碼是否輸入正確。')
