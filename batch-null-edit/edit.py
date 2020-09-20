@@ -29,7 +29,7 @@ def login():
                   DATA['clientlogin']['username'],
                   DATA['clientlogin']['status'],
                   '========================================'))
-    return S
+    return [S,DATA['clientlogin']['status']]
 
 def editor(title,text,summary='null edit',minor=True):
     '''
@@ -84,13 +84,17 @@ def get_wikitext(title):
 
 if __name__ == '__main__':
     api_url = 'https://{}.{}.org/w/api.php'.format(LANGUAGE,PROJECT)
-    S = login()
-    categories = get_pages_in_category()
-    print('目標分類「',LANGUAGE,':',CATEGORY_NAME,'」計',str(len(categories)),'個頁面',sep='',end=' ')
-    print('正在執行零編輯...')    
-    status=[]
-    for cat in range(len(categories)):
-        wikitext = get_wikitext(title=categories[cat])+'{{subst:void}}'
-        status.append(editor(title=categories[cat],text=wikitext))
-        print('\r','已完成{}/{} ({:.2%})'.format(cat+1,len(categories),((cat+1)/len(categories))),end='', flush=True)
-    print('\n執行完成。')
+    logins = login()
+    S = logins[0]
+    if logins[1] == 'PASS': #成功登入則執行
+        categories = get_pages_in_category()
+        print('目標分類「',LANGUAGE,':',CATEGORY_NAME,'」計',str(len(categories)),'個頁面',sep='',end=' ')
+        print('正在執行零編輯...')
+        status=[]
+        for cat in range(len(categories)):
+            wikitext = get_wikitext(title=categories[cat])+'{{subst:void}}'
+            status.append(editor(title=categories[cat],text=wikitext))
+            print('\r','已完成{}/{} ({:.2%})'.format(cat+1,len(categories),((cat+1)/len(categories))),end='', flush=True)
+        print('\n執行完成。')
+    else:
+        print('登入失敗！請檢查您的帳號或密碼是否輸入正確。')
